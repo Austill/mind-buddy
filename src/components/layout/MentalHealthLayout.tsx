@@ -1,134 +1,149 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { 
-  Heart, 
-  BookOpen, 
-  Brain, 
-  Phone, 
-  BarChart3, 
-  Settings,
-  Menu,
-  X
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Menu, X, Settings, Heart, BookOpen, Brain, Phone, BarChart3, Crown, LogOut } from "lucide-react";
 import MoodTracker from "@/components/mood/MoodTracker";
 import Journal from "@/components/journal/Journal";
 import Meditation from "@/components/meditation/Meditation";
 import CrisisSupport from "@/components/crisis/CrisisSupport";
 import ProgressDashboard from "@/components/progress/ProgressDashboard";
+import PremiumFeatures from "@/components/premium/PremiumFeatures";
+import ThemeToggle from "@/components/theme/ThemeToggle";
+import sereniTreeImage from "@/assets/serenity-tree.png";
+import { Outlet } from "react-router-dom";
 
 interface NavItem {
   id: string;
   label: string;
-  icon: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
   path: string;
+  isPremium?: boolean;
 }
 
 const navItems: NavItem[] = [
-  { id: "mood", label: "Mood Check", icon: <Heart className="w-5 h-5" />, path: "/mood" },
-  { id: "journal", label: "Journal", icon: <BookOpen className="w-5 h-5" />, path: "/journal" },
-  { id: "meditation", label: "Meditate", icon: <Brain className="w-5 h-5" />, path: "/meditation" },
-  { id: "crisis", label: "Crisis Support", icon: <Phone className="w-5 h-5" />, path: "/crisis" },
-  { id: "progress", label: "Progress", icon: <BarChart3 className="w-5 h-5" />, path: "/progress" },
+  { id: "mood", label: "Mood Tracker", icon: Heart, path: "/mood" },
+  { id: "journal", label: "Journal", icon: BookOpen, path: "/journal" },
+  { id: "meditation", label: "Meditation", icon: Brain, path: "/meditation" },
+  { id: "crisis", label: "Crisis Support", icon: Phone, path: "/crisis" },
+  { id: "progress", label: "Progress", icon: BarChart3, path: "/progress" },
+  { id: "premium", label: "Premium", icon: Crown, path: "/premium", isPremium: true }
 ];
 
-export default function MentalHealthLayout() {
+interface MentalHealthLayoutProps {
+  onSignOut?: () => void;
+  isPremium?: boolean;
+}
+
+export default function MentalHealthLayout({ onSignOut, isPremium = false }: MentalHealthLayoutProps) {
   const [activeTab, setActiveTab] = useState("mood");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] flex items-center justify-center">
-                <Heart className="w-4 h-4 text-white" />
-              </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] bg-clip-text text-transparent">
-                MindWell
-              </h1>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm">
-                <Settings className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="md:hidden"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              </Button>
-            </div>
+      <div className="flex flex-col h-screen">
+        {/* Header */}
+        <header className="bg-background border-b border-border px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <img 
+              src={sereniTreeImage} 
+              alt="SereniTree Logo" 
+              className="w-8 h-8 rounded-full object-cover"
+            />
+            <h1 className="text-xl font-bold bg-gradient-to-r from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] bg-clip-text text-transparent">
+              SereniTree
+            </h1>
+            {isPremium && (
+              <Badge className="bg-gradient-to-r from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] text-white">
+                <Crown className="w-3 h-3 mr-1" />
+                Premium
+              </Badge>
+            )}
           </div>
-        </div>
-      </header>
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="sm">
+              <Settings className="w-4 h-4" />
+            </Button>
+            {onSignOut && (
+              <Button variant="ghost" size="sm" onClick={onSignOut}>
+                <LogOut className="w-4 h-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </Button>
+          </div>
+        </header>
 
-      {/* Mobile Navigation */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-background border-b border-border">
-          <div className="container mx-auto px-4 py-2">
-            <div className="grid grid-cols-2 gap-2">
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-background border-b border-border">
+            <div className="flex flex-col">
               {navItems.map((item) => (
-                <Button
-                  key={item.id}
-                  variant={activeTab === item.id ? "default" : "ghost"}
-                  className={cn(
-                    "justify-start space-x-2",
-                    activeTab === item.id && "bg-[hsl(var(--wellness-primary))] hover:bg-[hsl(var(--wellness-primary))]"
-                  )}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  {item.icon}
-                  <span className="text-sm">{item.label}</span>
-                </Button>
+                <div key={item.id}>
+                  <button
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center space-x-3 w-full px-4 py-3 text-left transition-colors relative ${
+                      activeTab === item.id
+                        ? "bg-[hsl(var(--wellness-primary))] text-white"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span>{item.label}</span>
+                    {item.isPremium && (
+                      <Crown className="w-4 h-4 ml-auto text-[hsl(var(--wellness-primary))]" />
+                    )}
+                  </button>
+                </div>
               ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Desktop Navigation */}
-      <div className="hidden md:block bg-background/50 border-b border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex space-x-1 py-2">
-            {navItems.map((item) => (
-              <Button
-                key={item.id}
-                variant={activeTab === item.id ? "default" : "ghost"}
-                className={cn(
-                  "space-x-2",
-                  activeTab === item.id && "bg-[hsl(var(--wellness-primary))] hover:bg-[hsl(var(--wellness-primary))]"
-                )}
-                onClick={() => setActiveTab(item.id)}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Button>
-            ))}
+        {/* Desktop Navigation */}
+        <nav className="hidden md:block bg-background/50 border-b border-border">
+          <div className="px-4 py-2">
+            <div className="flex space-x-1">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors relative ${
+                    activeTab === item.id
+                      ? "bg-[hsl(var(--wellness-primary))] text-white"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                  {item.isPremium && (
+                    <Crown className="w-4 h-4 ml-auto text-[hsl(var(--wellness-primary))]" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
+        </nav>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto">
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-6">
           {activeTab === "mood" && <MoodTracker />}
           {activeTab === "journal" && <Journal />}
           {activeTab === "meditation" && <Meditation />}
           {activeTab === "crisis" && <CrisisSupport />}
           {activeTab === "progress" && <ProgressDashboard />}
-        </div>
-      </main>
+          {activeTab === "premium" && <PremiumFeatures isPremium={isPremium} />}
+        </main>
+      </div>
     </div>
   );
 }
