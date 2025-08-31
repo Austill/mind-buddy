@@ -26,13 +26,14 @@ const moodEmojis = [
 
 const commonTriggers = [
   "Work stress", "Sleep issues", "Social interaction", "Exercise", 
-  "Weather", "Family", "Health", "Financial concerns", "Relationships"
+  "Weather", "Family", "Health", "Financial concerns", "Relationships", "Other"
 ];
 
 export default function MoodTracker() {
   const [currentMood, setCurrentMood] = useState([3]);
   const [note, setNote] = useState("");
   const [selectedTriggers, setSelectedTriggers] = useState<string[]>([]);
+  const [customTrigger, setCustomTrigger] = useState("");
   const [recentEntries] = useState<MoodEntry[]>([
     {
       id: "1",
@@ -63,13 +64,20 @@ export default function MoodTracker() {
   };
 
   const handleSaveMood = () => {
+    // Prepare triggers array including custom trigger if provided
+    let finalTriggers = [...selectedTriggers];
+    if (selectedTriggers.includes("Other") && customTrigger.trim()) {
+      finalTriggers = finalTriggers.filter(t => t !== "Other");
+      finalTriggers.push(customTrigger.trim());
+    }
+    
     const entry: MoodEntry = {
       id: Date.now().toString(),
       date: new Date(),
       mood: currentMood[0],
       emoji: currentMoodData.emoji,
       note: note.trim() || undefined,
-      triggers: selectedTriggers.length > 0 ? selectedTriggers : undefined
+      triggers: finalTriggers.length > 0 ? finalTriggers : undefined
     };
     
     console.log("Saving mood entry:", entry);
@@ -78,6 +86,7 @@ export default function MoodTracker() {
     // Reset form
     setNote("");
     setSelectedTriggers([]);
+    setCustomTrigger("");
     
     // Show success message
     alert("Mood entry saved successfully!");
@@ -179,6 +188,19 @@ export default function MoodTracker() {
               </Badge>
             ))}
           </div>
+          
+          {/* Custom Trigger Input */}
+          {selectedTriggers.includes("Other") && (
+            <div className="mt-3">
+              <input
+                type="text"
+                placeholder="Describe what else influenced your mood..."
+                value={customTrigger}
+                onChange={(e) => setCustomTrigger(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              />
+            </div>
+          )}
         </div>
 
         {/* Save Button */}
