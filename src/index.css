@@ -62,19 +62,19 @@ All colors MUST be HSL.
     --wellness-warning: 38 92% 50%; /* Alert orange */
     --wellness-calm: 200 18% 46%; /* Serene blue-gray */
     --wellness-energy: 339 82% 52%; /* Motivating pink */
-    
+
     /* Mood Colors */
     --mood-excellent: 142 76% 36%; /* Bright green */
     --mood-good: 164 76% 42%; /* Light green */
     --mood-neutral: 45 93% 47%; /* Yellow */
     --mood-low: 25 95% 53%; /* Orange */
     --mood-poor: 0 84% 60%; /* Red */
-    
+
     /* Mental Health Gradients */
     --gradient-wellness: linear-gradient(135deg, hsl(var(--wellness-primary)), hsl(var(--wellness-secondary)));
     --gradient-calm: linear-gradient(180deg, hsl(var(--wellness-calm) / 0.1), hsl(var(--wellness-primary) / 0.05));
     --gradient-mood: linear-gradient(90deg, hsl(var(--mood-poor) / 0.2), hsl(var(--mood-excellent) / 0.2));
-    
+
     /* Shadows */
     --shadow-wellness: 0 4px 20px hsl(var(--wellness-primary) / 0.15);
     --shadow-calm: 0 2px 10px hsl(var(--wellness-calm) / 0.2);
@@ -125,19 +125,19 @@ All colors MUST be HSL.
     --wellness-warning: 38 92% 50%; /* Alert orange */
     --wellness-calm: 200 18% 46%; /* Serene blue-gray */
     --wellness-energy: 339 82% 52%; /* Motivating pink */
-    
+
     /* Mood Colors */
     --mood-excellent: 142 76% 36%; /* Bright green */
     --mood-good: 164 76% 42%; /* Light green */
     --mood-neutral: 45 93% 47%; /* Yellow */
     --mood-low: 25 95% 53%; /* Orange */
     --mood-poor: 0 84% 60%; /* Red */
-    
+
     /* Mental Health Gradients */
     --gradient-wellness: linear-gradient(135deg, hsl(var(--wellness-primary)), hsl(var(--wellness-secondary)));
     --gradient-calm: linear-gradient(180deg, hsl(var(--wellness-calm) / 0.1), hsl(var(--wellness-primary) / 0.05));
     --gradient-mood: linear-gradient(90deg, hsl(var(--mood-poor) / 0.2), hsl(var(--mood-excellent) / 0.2));
-    
+
     /* Shadows */
     --shadow-wellness: 0 4px 20px hsl(var(--wellness-primary) / 0.15);
     --shadow-calm: 0 2px 10px hsl(var(--wellness-calm) / 0.2);
@@ -149,7 +149,51 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  /* Added serene tree background for all pages */
+  html {
+    background-image: url("/tree.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+  }
+
+  /* Added dark overlay for better text readability */
+  html::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: -1;
+    pointer-events: none;
+  }
+
   body {
     @apply bg-background text-foreground;
+    /* Made body background transparent to show tree background */
+    background: transparent !important;
+    min-height: 100vh;
+  }
+
+  /* Added semi-transparent backgrounds for cards and popovers with blur effect */
+  .bg-card,
+  .bg-popover {
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(8px);
+  }
+
+  .dark .bg-card,
+  .dark .bg-popover {
+    background-color: rgba(20, 20, 20, 0.85) !important;
+    backdrop-filter: blur(8px);
+  }
+
+  /* Made background elements transparent to show tree */
+  .bg-background {
+    background-color: transparent !important;
   }
 }
