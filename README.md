@@ -14,7 +14,7 @@
 
 ### ▶️ Live Demo
 
-[**[your-live-app-url.vercel.app](https://mind-buddy-ten.vercel.app/)**]
+[**[your-live-mind-buddy-app](https://mind-buddy-ten.vercel.app/)**]
 
 ---
 
