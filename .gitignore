@@ -53,3 +53,4 @@ show_structure.py
 .coverage.*
 coverage.xml
 htmlcov/
+.env
