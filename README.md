@@ -18,7 +18,7 @@
 
 ---
 
-![Mind Buddy Screenshot](https://via.placeholder.com/800x450.png?text=Mind+Buddy+Application+Screenshot)
+![Mind Buddy Screenshot](./assets/Screenshot%20from%202025-09-04%2004-04-19.png)
 
 ## 🌟 Features
 
