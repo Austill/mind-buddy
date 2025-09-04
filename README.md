@@ -18,7 +18,7 @@
 
 ---
 
-![Mind Buddy Screenshot](./assets/Screenshot%20from%202025-09-04%2004-04-19.png)
+![Mind Buddy Screenshot](mind-buddy.png)
 
 ## 🌟 Features
 
