@@ -34,7 +34,7 @@
 | :--- | :--- |
 | **Frontend** | JavaScript, React (or your framework), CSS |
 | **Backend** | Python, Flask, Flask-SQLAlchemy, Flask-Migrate, Flask-CORS |
-| **Database** | SQLite (development), MySQL (production) |
+| **Database** | MongoDB (local/development), MongoDB Atlas (production) |
 | **Deployment** | **Frontend:** Vercel / **Backend:** Render |
 
 ## 🚀 Getting Started
@@ -47,7 +47,9 @@ Make sure you have the following installed on your machine:
 - [Git](https://git-scm.com/)
 - [Python 3.10+](https://www.python.org/downloads/)
 - [Node.js & npm](https://nodejs.org/en/)
-- [MySQL](https://dev.mysql.com/downloads/installer/) (if you want to run with MySQL locally)
+- [MongoDB](https://www.mongodb.com/try/download/community) (required for local development)
+
+📋 **For detailed MongoDB setup instructions, see [MONGODB_SETUP.md](MONGODB_SETUP.md)**
 
 ### Installation & Setup
 
@@ -62,29 +64,26 @@ Make sure you have the following installed on your machine:
     # Navigate to the backend directory
     cd backend
 
-    # Create and activate a virtual environment
+    # Create and activate a virtual environment (optional but recommended)
     python -m venv venv
     source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
 
     # Install dependencies
     pip install -r requirements.txt
 
-    # Create a .env file from the example and add your variables
-    # For MySQL, you will need to install an additional driver:
-    # pip install mysqlclient
-    #
-    # Your DATABASE_URL in the .env file should look like this:
-    # DATABASE_URL="mysql://user:password@host/db_name"
-    cp .env.example .env
-
-    # Run database migrations
-    flask db upgrade
+    # The .env file is already configured for local MongoDB
+    # Default connection: mongodb://localhost:27017/mindbuddy
+    # You can modify MONGO_URI in backend/.env if needed
 
     # Start the backend server (usually on http://127.0.0.1:5000)
+    python run.py
+    # Or use Flask directly:
     flask run
     ```
 
-3.  **Set up the Frontend (React/etc.):**
+    **Note**: MongoDB does not require migrations like SQL databases. Collections are created automatically when first used.
+
+3.  **Set up the Frontend (React):**
     ```sh
     # Open a new terminal and navigate to the frontend directory
     cd frontend
@@ -92,15 +91,18 @@ Make sure you have the following installed on your machine:
     # Install dependencies
     npm install
 
-    # Create a .env.local file from the example and add your variables
-    # The main variable you'll need is for the backend API URL:
-    #
+    # Configure the backend API URL if needed
+    # Check frontend/.env.local or create one with:
     # VITE_API_BASE_URL=http://127.0.0.1:5000
-    cp .env.example .env.local
 
-    # Start the frontend development server (usually on http://localhost:3000)
+    # Start the frontend development server (usually on http://localhost:5173)
     npm run dev
     ```
+
+4.  **Access the Application:**
+    - Frontend: http://localhost:5173
+    - Backend API: http://localhost:5000
+    - API Health Check: http://localhost:5000/api/health
 
 ## 🚢 Deployment
 

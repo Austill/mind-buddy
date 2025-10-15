@@ -14,7 +14,7 @@ class Config:
     # The string is split by commas in __init__.py
     CORS_ORIGINS = os.getenv(
         "CORS_ORIGINS",
-        "http://mb-frontend-rho.vercel.app,http://localhost:3000"
+        "http://mb-frontend-rho.vercel.app,http://localhost:8080"
     )
 
     # Logging configuration

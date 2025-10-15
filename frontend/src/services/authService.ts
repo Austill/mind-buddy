@@ -3,7 +3,7 @@ import { AuthResponse, User } from "@/types";
 
 // ✅ Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://mb-backend-sp95.onrender.com/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "https://mb-backend-sp95.onrender.com/api",
 });
 
 // ✅ Attach token to requests

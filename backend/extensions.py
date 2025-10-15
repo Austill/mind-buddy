@@ -1,7 +1,8 @@
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from pymongo import MongoClient
 
 bcrypt = Bcrypt()
 cors = CORS()
-mongo = MongoClient()
+
+# MongoDB client will be initialized in __init__.py
+mongo = None
