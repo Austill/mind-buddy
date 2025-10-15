@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify, current_app, send_file
-from backend.extensions import db
 from backend.models.user import User
 from backend.models.user_settings import UserSettings
 from backend.models.mood_entry import MoodEntry
@@ -9,6 +8,7 @@ import traceback
 import json
 import io
 from datetime import datetime
+from bson import ObjectId
 
 user_bp = Blueprint("user", __name__)
 
@@ -35,26 +35,29 @@ def update_profile(current_user):
         if not data:
             return jsonify({"message": "No data provided"}), 400
 
+        update_data = {}
+
         # Update allowed fields
         if 'firstName' in data:
-            current_user.first_name = data['firstName'].strip()
+            update_data['first_name'] = data['firstName'].strip()
         if 'lastName' in data:
-            current_user.last_name = data['lastName'].strip()
+            update_data['last_name'] = data['lastName'].strip()
         if 'email' in data:
             email = data['email'].strip().lower()
             # Check if email is already taken by another user
-            existing_user = User.query.filter(
-                User.email == email,
-                User.id != current_user.id
-            ).first()
-            if existing_user:
+            existing_user = User.find_by_email(email)
+            if existing_user and str(existing_user['_id']) != str(current_user._id):
                 return jsonify({"message": "Email already in use"}), 400
-            current_user.email = email
+            update_data['email'] = email
         if 'phone' in data:
-            current_user.phone = data['phone'].strip() or None
+            update_data['phone'] = data['phone'].strip() or None
 
-        current_user.updated_at = datetime.utcnow()
-        db.session.commit()
+        if update_data:
+            current_user.update(update_data)
+            # Refresh current_user data
+            current_user_data = User.find_by_id(str(current_user._id))
+            if current_user_data:
+                current_user = User.from_dict(current_user_data)
 
         return jsonify({
             "message": "Profile updated successfully",
@@ -63,7 +66,6 @@ def update_profile(current_user):
 
     except Exception as e:
         current_app.logger.error("Update profile error: %s\n%s", e, traceback.format_exc())
-        db.session.rollback()
         return jsonify({"message": "Internal server error"}), 500
 
 @user_bp.route("/settings", methods=["GET"])
@@ -71,15 +73,16 @@ def update_profile(current_user):
 def get_settings(current_user):
     """Get user settings"""
     try:
-        settings = UserSettings.query.filter_by(user_id=current_user.id).first()
-        
-        if not settings:
-            # Create default settings for user
-            settings = UserSettings(user_id=current_user.id)
-            db.session.add(settings)
-            db.session.commit()
+        settings_data = UserSettings.find_by_user(str(current_user._id))
 
-        return jsonify(settings.to_dict()), 200
+        if not settings_data:
+            # Create default settings for user
+            settings = UserSettings(str(current_user._id))
+            settings.save()
+            return jsonify(settings.to_dict_formatted()), 200
+
+        settings = UserSettings.from_dict(settings_data)
+        return jsonify(settings.to_dict_formatted()), 200
 
     except Exception as e:
         current_app.logger.error("Get settings error: %s\n%s", e, traceback.format_exc())
@@ -94,26 +97,24 @@ def update_settings(current_user):
         if not data:
             return jsonify({"message": "No data provided"}), 400
 
-        settings = UserSettings.query.filter_by(user_id=current_user.id).first()
-        
-        if not settings:
-            settings = UserSettings(user_id=current_user.id)
-            db.session.add(settings)
+        settings_data = UserSettings.find_by_user(str(current_user._id))
 
-        # Update settings from the provided data
-        settings.update_from_dict(data)
-        settings.updated_at = datetime.utcnow()
-        
-        db.session.commit()
+        if not settings_data:
+            settings = UserSettings(str(current_user._id))
+            settings.update_from_dict(data)
+            settings.save()
+        else:
+            settings = UserSettings.from_dict(settings_data)
+            settings.update_from_dict(data)
+            settings.update(settings.to_dict())
 
         return jsonify({
             "message": "Settings updated successfully",
-            "settings": settings.to_dict()
+            "settings": settings.to_dict_formatted()
         }), 200
 
     except Exception as e:
         current_app.logger.error("Update settings error: %s\n%s", e, traceback.format_exc())
-        db.session.rollback()
         return jsonify({"message": "Internal server error"}), 500
 
 @user_bp.route("/export-data", methods=["GET"])
@@ -131,22 +132,23 @@ def export_user_data(current_user):
         }
 
         # Get user settings
-        settings = UserSettings.query.filter_by(user_id=current_user.id).first()
-        if settings:
-            user_data["settings"] = settings.to_dict()
+        settings_data = UserSettings.find_by_user(str(current_user._id))
+        if settings_data:
+            settings = UserSettings.from_dict(settings_data)
+            user_data["settings"] = settings.to_dict_formatted()
 
         # Get mood entries
-        mood_entries = MoodEntry.query.filter_by(user_id=current_user.id).all()
-        user_data["moodEntries"] = [entry.to_dict() for entry in mood_entries]
+        mood_entries_data = MoodEntry.find_by_user(str(current_user._id))
+        user_data["moodEntries"] = [entry for entry in mood_entries_data]
 
         # Get journal entries
-        journal_entries = JournalEntry.query.filter_by(user_id=current_user.id).all()
-        user_data["journalEntries"] = [entry.to_dict() for entry in journal_entries]
+        journal_entries_data = JournalEntry.find_by_user(str(current_user._id))
+        user_data["journalEntries"] = [entry for entry in journal_entries_data]
 
         # Create JSON file in memory
         json_data = json.dumps(user_data, indent=2, default=str)
         json_bytes = json_data.encode('utf-8')
-        
+
         # Create a file-like object
         file_obj = io.BytesIO(json_bytes)
         file_obj.seek(0)
@@ -154,7 +156,7 @@ def export_user_data(current_user):
         return send_file(
             file_obj,
             as_attachment=True,
-            download_name=f'serenity-tree-data-{current_user.id}-{datetime.utcnow().strftime("%Y%m%d")}.json',
+            download_name=f'mindbuddy-data-{str(current_user._id)}-{datetime.utcnow().strftime("%Y%m%d")}.json',
             mimetype='application/json'
         )
 
@@ -167,15 +169,18 @@ def export_user_data(current_user):
 def delete_account(current_user):
     """Delete user account and all associated data"""
     try:
-        # Due to cascade relationships, deleting the user will delete all related data
-        db.session.delete(current_user)
-        db.session.commit()
+        # Delete all related data first
+        MoodEntry.collection.delete_many({"user_id": current_user._id})
+        JournalEntry.collection.delete_many({"user_id": current_user._id})
+        UserSettings.collection.delete_many({"user_id": current_user._id})
+
+        # Delete the user
+        current_user.delete()
 
         return jsonify({"message": "Account deleted successfully"}), 200
 
     except Exception as e:
         current_app.logger.error("Delete account error: %s\n%s", e, traceback.format_exc())
-        db.session.rollback()
         return jsonify({"message": "Internal server error"}), 500
 
 @user_bp.route("/stats", methods=["GET"])
@@ -184,9 +189,9 @@ def get_user_stats(current_user):
     """Get user statistics"""
     try:
         # Count entries
-        mood_count = MoodEntry.query.filter_by(user_id=current_user.id).count()
-        journal_count = JournalEntry.query.filter_by(user_id=current_user.id).count()
-        
+        mood_count = MoodEntry.collection.count_documents({"user_id": current_user._id})
+        journal_count = JournalEntry.collection.count_documents({"user_id": current_user._id})
+
         # Calculate days since joining
         days_since_joining = (datetime.utcnow() - current_user.created_at).days if current_user.created_at else 0
 

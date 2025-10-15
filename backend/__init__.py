@@ -1,6 +1,8 @@
 import os
+import logging
 from flask import Flask
-from .extensions import db, migrate, bcrypt, cors
+from .extensions import mongo, bcrypt, cors
+from pymongo import MongoClient
 
 
 def create_app(config_class="backend.config.Config"):
@@ -8,14 +10,41 @@ def create_app(config_class="backend.config.Config"):
     # Load configuration from config object
     app.config.from_object(config_class)
 
-    # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
-    bcrypt.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": "*"}})  # Configure origins for production
+    # Configure logging
+    logging.basicConfig(
+        level=getattr(logging, app.config["LOGGING_LEVEL"]),
+        format=app.config["LOGGING_FORMAT"]
+    )
 
-    # Import models here to ensure they are registered with SQLAlchemy for migrations
-    from backend.models import user, mood_entry, user_settings
+    # Initialize extensions
+    bcrypt.init_app(app)
+    cors.init_app(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": [origin.strip() for origin in app.config["CORS_ORIGINS"].split(",")]
+        }
+    },
+    supports_credentials=True
+)
+
+    # Initialize MongoDB
+    global mongo
+    mongo = MongoClient(app.config["MONGO_URI"])
+    db = mongo.mindbuddy
+
+    # Validate database connection on startup
+    with app.app_context():
+        try:
+            # Ping the database
+            mongo.admin.command('ping')
+            app.logger.info("MongoDB connection established successfully")
+        except Exception as e:
+            app.logger.error("Failed to connect to MongoDB: %s", e)
+            raise
+
+    # This will execute backend/models/__init__.py and register all models
+    from . import models
 
     # Import and register blueprints
     from backend.routes.journal import journal_bp
@@ -32,7 +61,7 @@ def create_app(config_class="backend.config.Config"):
     @app.route("/api/health")
     def health_check():
         return {"status": "healthy"}
-    
+
     # Homepage route
     @app.route("/")
     def home():
