@@ -54,11 +54,12 @@ cp .env.example .env
 
 ---
 
-## 4. Vite Dev Server Proxy Configuration
+## 4. Vite Dev Server Proxy Configuration & API Path
 
 **Issue**: CORS issues and connection refused errors when frontend tries to connect to backend.
 
-**Fix**: Added Vite proxy configuration in `vite.config.ts`:
+**Fix**: 
+1. Added Vite proxy configuration in `vite.config.ts`:
 ```typescript
 proxy: {
   '/api': {
@@ -69,28 +70,52 @@ proxy: {
 }
 ```
 
-**Files Modified**: `frontend/vite.config.ts`
+2. **CRITICAL**: Changed `authService.ts` to use relative path in development:
+```typescript
+baseURL: import.meta.env.DEV ? "/api" : (import.meta.env.VITE_API_URL || "http://localhost:5000/api"),
+```
 
-**Result**: Frontend can now properly proxy API requests to backend, avoiding CORS issues.
+This ensures API calls go through the Vite proxy (`/api`) instead of directly to `http://localhost:5000`, which avoids CORS issues.
+
+**Files Modified**: 
+- `frontend/vite.config.ts`
+- `frontend/src/services/authService.ts`
+
+**Result**: Frontend properly proxies API requests through Vite dev server, eliminating CORS errors.
 
 ---
 
-## 5. Vite File Watcher Configuration
+## 5. Vite File Watcher Configuration & Crash Prevention
 
 **Issue**: Vite dev server crashes with `Error: UNKNOWN: unknown error, read` when OneDrive locks temp files.
 
-**Fix**: Added file watching ignore patterns in `vite.config.ts`:
+**Fix**: 
+1. Added file watching ignore patterns in `vite.config.ts`:
 ```typescript
 watch: {
   ignored: ['**/.git/**', '**/node_modules/**', '**/OneDrive/**', '**~*']
 }
 ```
 
+2. **CRITICAL**: Added global error handlers to catch file read errors without crashing:
+```typescript
+process.on('uncaughtException', (error) => {
+  if (error.message?.includes('UNKNOWN') || error.message?.includes('read')) {
+    console.warn('⚠️ File read error detected (likely OneDrive conflict)');
+    return; // Don't crash
+  }
+  throw error; // Re-throw other errors
+});
+```
+
 **Files Modified**: `frontend/vite.config.ts`
 
-**Result**: Prevents Vite from watching OneDrive metadata files that can cause crashes.
+**Result**: 
+- Prevents Vite from watching OneDrive metadata files
+- Catches and logs file read errors without crashing the dev server
+- Server continues running even when OneDrive causes file conflicts
 
-**Note**: If the repository is inside OneDrive, consider moving it outside OneDrive for better stability.
+**Note**: While this prevents crashes, **moving the repository outside OneDrive is still strongly recommended** for optimal stability.
 
 ---
 
