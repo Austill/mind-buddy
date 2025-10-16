@@ -196,9 +196,10 @@ export default function MoodTracker() {
           
           {/* Emoji Scale */}
           <div className="flex justify-between">
+            {/* FIX: added unique key prop using mood.value */}
             {moodEmojis.map((mood) => (
               <Button
-                key={mood.value}
+                key={`mood-emoji-${mood.value}`}
                 variant="ghost"
                 size="sm"
                 className={cn(
