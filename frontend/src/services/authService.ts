@@ -2,8 +2,9 @@ import axios from "axios";
 import { AuthResponse, User } from "@/types";
 
 // ✅ Axios instance
+// FIX: use VITE_API_URL environment variable (vite proxy handles /api prefix)
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "https://mb-backend-sp95.onrender.com/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
 // ✅ Attach token to requests
