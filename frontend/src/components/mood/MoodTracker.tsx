@@ -127,7 +127,7 @@ export default function MoodTracker() {
       };
       
       setTodayEntry(newEntry);
-      setRecentEntries(prev => [newEntry, ...prev.slice(0, 9)]); // Keep only 10 recent entries
+      setRecentEntries(prev => [newEntry, ...prev.filter(e => e.id !== newEntry.id).slice(0, 9)]); // Keep only 10 recent entries, avoid duplicates
       
       // Reset form
       setNote("");
@@ -232,13 +232,14 @@ export default function MoodTracker() {
             What influenced your mood today?
           </label>
           <div className="flex flex-wrap gap-2">
+            {/* FIX: added unique key prop for each trigger */}
             {commonTriggers.map((trigger) => (
               <Badge
-                key={trigger}
+                key={`trigger-${trigger}`}
                 variant={selectedTriggers.includes(trigger) ? "default" : "outline"}
                 className={cn(
                   "cursor-pointer transition-all hover:scale-105",
-                  selectedTriggers.includes(trigger) && 
+                  selectedTriggers.includes(trigger) &&
                   "bg-[hsl(var(--wellness-primary))] hover:bg-[hsl(var(--wellness-primary))]"
                 )}
                 onClick={() => handleTriggerToggle(trigger)}
@@ -317,8 +318,8 @@ export default function MoodTracker() {
                   )}
                   {entry.triggers && entry.triggers.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {entry.triggers.map((trigger, index) => (
-                        <Badge key={`${trigger}-${index}`} variant="secondary" className="text-xs">
+                      {entry.triggers.map((trigger) => (
+                        <Badge key={`${entry.id}-${trigger}`} variant="secondary" className="text-xs">
                           {trigger}
                         </Badge>
                       ))}
