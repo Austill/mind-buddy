@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Calendar, 
+import { useToast } from "@/hooks/use-toast";
+import { getDailyInsight, type WellnessInsight } from "@/services/aiService";
+import InsightCard from "@/components/ai/InsightCard";
+import TrendChart from "@/components/ai/TrendChart";
+import {
+  TrendingUp,
+  TrendingDown,
+  Calendar,
   Target,
   Award,
   BarChart3,
@@ -110,7 +114,32 @@ const goals: Goal[] = [
 
 export default function ProgressDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('week');
-  
+  const [dailyInsight, setDailyInsight] = useState<WellnessInsight | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Load daily insight when dashboard mounts
+    loadDailyInsight();
+  }, []);
+
+  const loadDailyInsight = async () => {
+    try {
+      const data = await getDailyInsight();
+      setDailyInsight(data.insight);
+
+      // Show modal if it's a new insight
+      if (data.is_new) {
+        // Show notification or modal
+        toast({
+          title: "New Daily Insight",
+          description: "Check out your personalized wellness tip!",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load daily insight:', error);
+    }
+  };
+
   // Calculate mood statistics
   const averageMood = mockMoodData.reduce((sum, data) => sum + data.mood, 0) / mockMoodData.length;
   const moodTrend = mockMoodData.length >= 2 
@@ -142,13 +171,13 @@ export default function ProgressDashboard() {
     return (
       <div className="relative h-32 bg-muted/20 rounded-lg p-4">
         <div className="flex items-end justify-between h-full">
-          {mockMoodData.map((data, index) => {
+          {mockMoodData.map((data) => {
             const height = (data.mood / maxMood) * chartHeight;
             return (
-              <div key={index} className="flex flex-col items-center space-y-2">
-                <div 
+              <div key={data.date} className="flex flex-col items-center space-y-2">
+                <div
                   className="w-6 rounded-t-lg transition-all hover:opacity-80"
-                  style={{ 
+                  style={{
                     height: `${height}px`,
                     backgroundColor: getMoodColor(data.mood),
                     minHeight: '8px'
@@ -177,20 +206,20 @@ export default function ProgressDashboard() {
             </p>
           </div>
           <div className="flex rounded-lg border bg-background">
-            {(['week', 'month', 'year'] as const).map((period) => (
-              <Button
-                key={period}
-                variant={selectedPeriod === period ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedPeriod(period)}
-                className={cn(
-                  "capitalize",
-                  selectedPeriod === period && "bg-[hsl(var(--wellness-primary))] hover:bg-[hsl(var(--wellness-primary))]"
-                )}
-              >
-                {period}
-              </Button>
-            ))}
+          {(['week', 'month', 'year'] as const).map((period) => (
+            <Button
+              key={period}
+              variant={selectedPeriod === period ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setSelectedPeriod(period)}
+              className={cn(
+                "capitalize",
+                selectedPeriod === period && "bg-[hsl(var(--wellness-primary))] hover:bg-[hsl(var(--wellness-primary))]"
+              )}
+            >
+              {period}
+            </Button>
+          ))}
           </div>
         </div>
       </Card>
@@ -296,10 +325,10 @@ export default function ProgressDashboard() {
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">Current Streaks</h3>
         <div className="grid gap-4 md:grid-cols-3">
-          {streaks.map((streak, index) => (
-            <div key={index} className="p-4 rounded-lg bg-muted/30">
+          {streaks.map((streak) => (
+            <div key={streak.type} className="p-4 rounded-lg bg-muted/30">
               <div className="flex items-center space-x-3 mb-3">
-                <div 
+                <div
                   className="p-2 rounded-full text-white"
                   style={{ backgroundColor: streak.color }}
                 >
@@ -314,7 +343,7 @@ export default function ProgressDashboard() {
                 </div>
               </div>
               <div className="text-center">
-                <div 
+                <div
                   className="text-2xl font-bold"
                   style={{ color: streak.color }}
                 >
@@ -345,9 +374,9 @@ export default function ProgressDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
                       <h4 className="font-medium">{goal.title}</h4>
-                      <Badge 
-                        variant="outline" 
-                        style={{ 
+                      <Badge
+                        variant="outline"
+                        style={{
                           borderColor: getCategoryColor(goal.category),
                           color: getCategoryColor(goal.category)
                         }}
@@ -359,14 +388,14 @@ export default function ProgressDashboard() {
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span>{goal.progress} / {goal.target} {goal.unit}</span>
                     <span className="font-medium">{Math.round(progressPercentage)}%</span>
                   </div>
-                  <Progress 
-                    value={progressPercentage} 
+                  <Progress
+                    value={progressPercentage}
                     className="h-2"
                   />
                 </div>
@@ -376,6 +405,18 @@ export default function ProgressDashboard() {
         </div>
       </Card>
 
+      {/* Daily Insight */}
+      {dailyInsight && (
+        <InsightCard
+          insight={dailyInsight}
+          compact={false}
+          onUpdate={loadDailyInsight}
+        />
+      )}
+
+      {/* Mood Trends */}
+      <TrendChart />
+
       {/* Achievements */}
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">Recent Achievements</h3>
@@ -384,8 +425,8 @@ export default function ProgressDashboard() {
             { title: "First Week Complete!", description: "Completed 7 days of mood tracking", date: "2 days ago", icon: <Award className="w-4 h-4" /> },
             { title: "Meditation Master", description: "Completed your first 10-minute meditation", date: "5 days ago", icon: <Brain className="w-4 h-4" /> },
             { title: "Streak Starter", description: "Started your first 3-day streak", date: "1 week ago", icon: <Flame className="w-4 h-4" /> }
-          ].map((achievement, index) => (
-            <div key={index} className="flex items-center space-x-4 p-3 rounded-lg bg-gradient-to-r from-[hsl(var(--wellness-primary)/0.05)] to-[hsl(var(--wellness-secondary)/0.05)]">
+          ].map((achievement) => (
+            <div key={achievement.title} className="flex items-center space-x-4 p-3 rounded-lg bg-gradient-to-r from-[hsl(var(--wellness-primary)/0.05)] to-[hsl(var(--wellness-secondary)/0.05)]">
               <div className="p-2 rounded-full bg-[hsl(var(--wellness-primary))] text-white">
                 {achievement.icon}
               </div>

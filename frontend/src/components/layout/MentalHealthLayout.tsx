@@ -87,7 +87,7 @@ export default function MentalHealthLayout({ onSignOut, isPremium = false }: Men
           <div className="md:hidden bg-background border-b border-border">
             <div className="flex flex-col">
               {navItems.map((item) => (
-                <div key={item.id}>
+                <div key={`mobile-nav-${item.id}`}>
                   <button
                     onClick={() => {
                       setActiveTab(item.id);
@@ -117,7 +117,7 @@ export default function MentalHealthLayout({ onSignOut, isPremium = false }: Men
             <div className="flex space-x-1">
               {navItems.map((item) => (
                 <button
-                  key={item.id}
+                  key={`desktop-nav-${item.id}`}
                   onClick={() => setActiveTab(item.id)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors relative ${
                     activeTab === item.id

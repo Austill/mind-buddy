@@ -22,11 +22,21 @@
 
 ## 🌟 Features
 
-- **AI Chat**: Engage with an intelligent chatbot for support and guidance.
+### Core Features
 - **Journaling**: A secure and private space to write down your thoughts.
 - **Mood Tracking**: Log your daily mood to visualize trends over time.
 - **User Authentication**: Secure sign-up and login functionality.
 - **Responsive Design**: A seamless experience on both desktop and mobile devices.
+
+### 🤖 AI-Powered Features (NEW!)
+- **Sentiment Analysis**: Automatic emotion detection from journal entries using RoBERTa model
+- **AI Chatbot (Sereni)**: Conversational AI companion for mental wellness support
+- **Personalized Insights**: Daily wellness tips based on mood patterns
+- **Crisis Detection**: Automatic detection of concerning keywords with immediate resources
+- **Wellness Recommendations**: Activity suggestions (breathing, meditation, journaling) based on mood
+- **Trend Analysis**: Visualize emotional patterns over time
+
+📋 **For detailed AI features documentation, see [AI_FEATURES.md](AI_FEATURES.md)**
 
 ## 🛠️ Tech Stack
 

@@ -51,11 +51,20 @@ def create_app(config_class="backend.config.Config"):
     from backend.routes.user import user_bp
     from backend.routes.auth import auth
     from backend.routes.mood import mood_bp
+    # Temporarily disabled AI features due to dependency issues
+    # from backend.routes.ai_sentiment import sentiment_bp
+    # from backend.routes.ai_chat import chat_bp
+    # from backend.routes.ai_insights import insights_bp
 
     app.register_blueprint(journal_bp, url_prefix="/api/journal")
     app.register_blueprint(user_bp, url_prefix="/api/user")
     app.register_blueprint(auth, url_prefix="/api/auth")
     app.register_blueprint(mood_bp, url_prefix="/api/mood")
+    
+    # AI Feature Routes - temporarily disabled
+    # app.register_blueprint(sentiment_bp, url_prefix="/api/sentiment")
+    # app.register_blueprint(chat_bp, url_prefix="/api/chat")
+    # app.register_blueprint(insights_bp, url_prefix="/api/insights")
 
     # Health check route
     @app.route("/api/health")

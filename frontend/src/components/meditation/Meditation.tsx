@@ -284,12 +284,12 @@ export default function Meditation() {
           <h4 className="font-semibold mb-4">Session Guide</h4>
           <div className="space-y-3">
             {selectedSession.instructions.map((instruction, index) => (
-              <div 
-                key={index}
+              <div
+                key={`instruction-${selectedSession.id}-${index}`}
                 className={cn(
                   "flex items-start space-x-3 p-3 rounded-lg transition-all",
-                  index === currentInstructionIndex 
-                    ? "bg-primary/10 border-l-4 border-primary" 
+                  index === currentInstructionIndex
+                    ? "bg-primary/10 border-l-4 border-primary"
                     : "bg-muted/30"
                 )}
               >
@@ -342,7 +342,7 @@ export default function Meditation() {
       {/* Meditation Sessions */}
       <div className="grid gap-6 md:grid-cols-2">
         {meditationSessions.map((session) => (
-          <Card key={session.id} className="p-6 hover:shadow-md transition-shadow">
+          <Card key={`meditation-session-${session.id}`} className="p-6 hover:shadow-md transition-shadow">
             <div className="flex items-start space-x-4">
               <div 
                 className="p-3 rounded-full text-white flex-shrink-0"

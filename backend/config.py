@@ -9,7 +9,7 @@ load_dotenv(dotenv_path=dotenv_path)
 class Config:
     """Base configuration settings."""
     SECRET_KEY = os.getenv("SECRET_KEY", "a-very-secret-key-for-dev")
-    MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://austin:misarobt1@cluster1.ynxgjwq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1")
+    MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/mindbuddy")
     # Allow CORS from your Vercel frontend and local dev
     # The string is split by commas in __init__.py
     CORS_ORIGINS = os.getenv(

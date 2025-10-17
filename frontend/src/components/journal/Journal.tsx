@@ -9,19 +9,21 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Save, 
-  Lock, 
-  Unlock, 
-  Search, 
+  Save,
+  Lock,
+  Unlock,
+  Search,
   Calendar,
   BookOpen,
   Brain,
   Sparkles,
   Eye,
   EyeOff
-} from "lucide-react"; 
+} from "lucide-react";
 import { JournalEntry } from "@/types";
 import { getJournalEntries, createJournalEntry } from "@/services/journalService";
+import { analyzeSentiment } from "@/services/aiService";
+import SentimentDisplay from "@/components/ai/SentimentDisplay";
 
 export default function Journal() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -35,6 +37,7 @@ export default function Journal() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isWriting, setIsWriting] = useState(false);
   const [showAIInsights, setShowAIInsights] = useState(true);
+  const [sentiment, setSentiment] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -73,7 +76,26 @@ export default function Journal() {
     }
     setIsSaving(true);
     try {
-      await createJournalEntry(currentEntry);
+      const savedEntry = await createJournalEntry(currentEntry);
+
+      // Analyze sentiment
+      try {
+        const sentimentResult = await analyzeSentiment(currentEntry.content, savedEntry.id);
+
+        // Show sentiment to user
+        setSentiment(sentimentResult.sentiment);
+
+        // Display any generated insights
+        sentimentResult.insights.forEach(insight => {
+          toast({
+            title: "AI Insight",
+            description: insight.insight_text,
+          });
+        });
+      } catch (error) {
+        console.error('Sentiment analysis failed:', error);
+      }
+
       toast({
         title: "Success",
         description: "Journal entry saved successfully!",
@@ -167,6 +189,11 @@ export default function Journal() {
             </Button>
           </div>
         </Card>
+
+        {/* Sentiment Display */}
+        {sentiment && (
+          <SentimentDisplay sentiment={sentiment} compact={true} />
+        )}
       </div>
     );
   }
@@ -231,25 +258,11 @@ export default function Journal() {
                       <span>Private</span>
                     </Badge>
                   )}
-                  {entry.sentiment && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <div 
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: getSentimentColor(entry.sentiment) }}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Sentiment: {entry.sentiment}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
+                  {/* Sentiment indicator will be added when backend supports it */}
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground shrink-0">
                   <Calendar className="w-4 h-4" />
-                  <span>{new Date(entry.date).toLocaleDateString()}</span>
+                  <span>{new Date(entry.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
 
@@ -257,25 +270,7 @@ export default function Journal() {
                 {entry.content}
               </p>
 
-              {entry.tags && entry.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {entry.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              {showAIInsights && entry.aiInsights && (
-                <Alert className="mt-4 bg-gradient-to-r from-[hsl(var(--wellness-primary)/0.05)] to-[hsl(var(--wellness-secondary)/0.05)] border-[hsl(var(--wellness-primary)/0.2)]">
-                  <Brain className="h-4 w-4" />
-                  <AlertDescription className="flex items-start space-x-2">
-                    <Sparkles className="w-4 h-4 mt-0.5 text-[hsl(var(--wellness-primary))]" />
-                    <span>{entry.aiInsights}</span>
-                  </AlertDescription>
-                </Alert>
-              )}
+              {/* Tags and AI insights will be added when backend supports them */}
             </Card>
           ))}
         </div>
@@ -288,7 +283,7 @@ export default function Journal() {
             <p className="text-muted-foreground mb-4">
               {searchTerm ? "Try adjusting your search terms" : "Start your journaling journey by writing your first entry"}
             </p>
-            <Button 
+            <Button
               onClick={() => setIsWriting(true)}
               className="bg-[hsl(var(--wellness-primary))] hover:bg-[hsl(var(--wellness-primary))/90] text-white"
             >
