@@ -53,7 +53,7 @@ def create_app(config_class="backend.config.Config"):
     from backend.routes.mood import mood_bp
     # Temporarily disabled AI features due to dependency issues
     # from backend.routes.ai_sentiment import sentiment_bp
-    # from backend.routes.ai_chat import chat_bp
+    from backend.routes.ai_chat import chat_bp     #commented this out 
     # from backend.routes.ai_insights import insights_bp
 
     app.register_blueprint(journal_bp, url_prefix="/api/journal")
@@ -63,7 +63,7 @@ def create_app(config_class="backend.config.Config"):
     
     # AI Feature Routes - temporarily disabled
     # app.register_blueprint(sentiment_bp, url_prefix="/api/sentiment")
-    # app.register_blueprint(chat_bp, url_prefix="/api/chat")
+    app.register_blueprint(chat_bp, url_prefix="/api/chat")    #commented this out 
     # app.register_blueprint(insights_bp, url_prefix="/api/insights")
 
     # Health check route
