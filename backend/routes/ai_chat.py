@@ -6,7 +6,7 @@ Conversational AI assistant (Sereni) endpoints.
 from flask import Blueprint, request, jsonify, current_app
 from backend.decorators import token_required
 from backend.models import ChatLog, SentimentHistory
-from backend.services.chat_service import get_chatbot
+from backend.services.llm_service import get_llm_service
 from backend.services.sentiment_service import get_sentiment_analyzer
 import traceback
 
@@ -40,13 +40,38 @@ def send_message(current_user):
         if conversation_id:
             context = ChatLog.get_conversation_context(conversation_id, limit=5)
         
-        # Generate AI response
-        chatbot = get_chatbot()
-        response_data = chatbot.generate_response(
-            message,
-            conversation_context=context,
-            user_sentiment=sentiment_label
-        )
+        # Generate AI response using LLM service
+        llm_service = get_llm_service()
+        if llm_service is None:
+            return jsonify({'error': 'LLM service not available'}), 503
+
+        # Convert context to messages format for LLM service
+        messages = []
+        if context:
+            for msg in context[-5:]:  # Last 5 messages for context
+                role = msg.get('role', 'user')
+                content = msg.get('content', '')
+                if role == 'user':
+                    messages.append({"role": "user", "content": content})
+                elif role == 'assistant':
+                    messages.append({"role": "assistant", "content": content})
+
+        # Add current message
+        messages.append({"role": "user", "content": message})
+
+        # Generate response
+        ai_response = llm_service.generate_response(messages)
+
+        # Check for crisis keywords in response
+        requires_help = any(keyword in ai_response.lower() for keyword in [
+            'suicide', 'kill yourself', 'seek professional help', 'emergency services'
+        ])
+
+        response_data = {
+            'response': ai_response,
+            'source': 'ai_model',
+            'requires_professional_help': requires_help
+        }
         
         # Save chat log
         chat_log = ChatLog(
@@ -188,8 +213,26 @@ def proactive_check_in(current_user):
             analyzer = get_sentiment_analyzer()
             trend_analysis = analyzer.analyze_sentiment_trend(sentiment_records)
             
-            chatbot = get_chatbot()
-            message = chatbot.get_supportive_message(trend_analysis)
+            # Use LLM service for proactive check-in
+            llm_service = get_llm_service()
+            if llm_service:
+                # Generate a personalized message based on trends
+                trend_message = f"Based on your recent mood patterns, you seem to be {trend_analysis.get('trend', 'stable')}. "
+                if trend_analysis.get('risk_level') == 'high':
+                    trend_message += "I'm here if you'd like to talk about what's been going on."
+                elif trend_analysis.get('trend') == 'improving':
+                    trend_message += "It's great to see things looking up! How are you feeling today?"
+                else:
+                    trend_message += "How are you doing today?"
+
+                messages = [{"role": "user", "content": trend_message}]
+                message = llm_service.generate_response(messages)
+            else:
+                message = (
+                    "Welcome! I'm Sereni, your mental wellness companion. "
+                    "I'm here to support you on your wellness journey. "
+                    "How are you feeling today?"
+                )
         
         return jsonify({
             "message": message,

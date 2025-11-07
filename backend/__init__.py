@@ -1,7 +1,7 @@
 import os
 import logging
 from flask import Flask
-from .extensions import mongo, bcrypt, cors
+from .extensions import mongo, bcrypt, cors, jwt
 from pymongo import MongoClient
 
 
@@ -18,6 +18,7 @@ def create_app(config_class="backend.config.Config"):
 
     # Initialize extensions
     bcrypt.init_app(app)
+    jwt.init_app(app)
     cors.init_app(
     app,
     resources={
@@ -51,20 +52,26 @@ def create_app(config_class="backend.config.Config"):
     from backend.routes.user import user_bp
     from backend.routes.auth import auth
     from backend.routes.mood import mood_bp
-    # Temporarily disabled AI features due to dependency issues
-    # from backend.routes.ai_sentiment import sentiment_bp
-    # from backend.routes.ai_chat import chat_bp
-    # from backend.routes.ai_insights import insights_bp
+    from backend.routes.subscribe import subscribe_bp
+    from backend.routes.payments import payments_bp
+    from backend.routes.webhook import webhook_bp
+    from backend.routes.chat import chat_bp
+    from backend.routes.ai_chat import chat_bp as ai_chat_bp
+    from backend.routes.ai_insights import insights_bp
 
     app.register_blueprint(journal_bp, url_prefix="/api/journal")
     app.register_blueprint(user_bp, url_prefix="/api/user")
     app.register_blueprint(auth, url_prefix="/api/auth")
     app.register_blueprint(mood_bp, url_prefix="/api/mood")
-    
-    # AI Feature Routes - temporarily disabled
-    # app.register_blueprint(sentiment_bp, url_prefix="/api/sentiment")
-    # app.register_blueprint(chat_bp, url_prefix="/api/chat")
-    # app.register_blueprint(insights_bp, url_prefix="/api/insights")
+    app.register_blueprint(subscribe_bp, url_prefix="/api")
+    app.register_blueprint(payments_bp, url_prefix="/api/payments")
+    app.register_blueprint(webhook_bp, url_prefix="/api")
+    app.register_blueprint(chat_bp)
+    app.register_blueprint(ai_chat_bp, url_prefix="/api/chat")
+    app.register_blueprint(insights_bp, url_prefix="/api/ai_insights")
+
+    # LLM service will be initialized lazily on first use
+    app.logger.info("LLM service will be initialized on first use")
 
     # Health check route
     @app.route("/api/health")

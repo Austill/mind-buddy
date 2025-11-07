@@ -367,7 +367,7 @@ export default function Meditation() {
                   <p className="text-sm font-medium mb-2">What you'll do:</p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     {session.instructions.slice(0, 2).map((instruction, index) => (
-                      <li key={index} className="flex items-start">
+                      <li key={`preview-${session.id}-${index}`} className="flex items-start">
                         <span className="w-1 h-1 rounded-full bg-current mt-2 mr-2 flex-shrink-0" />
                         {instruction}
                       </li>

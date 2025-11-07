@@ -8,8 +8,8 @@ class JournalEntry:
     def __init__(self, user_id, title, content, is_private=False, sentiment=None, ai_insights=None, tags=None):
         self._id = ObjectId()
         self.user_id = ObjectId(user_id) if isinstance(user_id, str) else user_id
-        self.title = title
-        self.content = content
+        self.title = title or ""
+        self.content = content or ""
         self.created_at = datetime.utcnow()
         self.updated_at = datetime.utcnow()
         self.is_private = is_private
@@ -41,30 +41,55 @@ class JournalEntry:
         return self.collection.delete_one({"_id": self._id})
 
     def to_dict(self):
+        # return both snake_case (for backward compatibility) and camelCase (for React)
         return {
             "_id": str(self._id),
+            "id": str(self._id),
             "user_id": str(self.user_id),
+            "userId": str(self.user_id),
             "title": self.title,
             "content": self.content,
             "created_at": self.created_at.isoformat() if self.created_at else None,
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
             "is_private": self.is_private,
+            "isPrivate": self.is_private,
             "sentiment": self.sentiment,
             "ai_insights": self.ai_insights,
+            "aiInsights": self.ai_insights,
             "tags": self.tags
         }
 
     @classmethod
     def from_dict(cls, data):
         entry = cls.__new__(cls)
-        entry._id = data.get("_id")
-        entry.user_id = data.get("user_id")
-        entry.title = data.get("title")
-        entry.content = data.get("content")
-        entry.created_at = data.get("created_at")
-        entry.updated_at = data.get("updated_at")
-        entry.is_private = data.get("is_private", False)
+        entry._id = data.get("_id") or data.get("id")
+        if isinstance(entry._id, str):
+            entry._id = ObjectId(entry._id)
+
+        uid = data.get("user_id") or data.get("userId")
+        entry.user_id = ObjectId(uid) if isinstance(uid, str) else uid
+
+        entry.title = data.get("title", "")
+        entry.content = data.get("content", "")
+        entry.is_private = data.get("is_private", data.get("isPrivate", False))
         entry.sentiment = data.get("sentiment")
-        entry.ai_insights = data.get("ai_insights")
+        entry.ai_insights = data.get("ai_insights") or data.get("aiInsights")
         entry.tags = data.get("tags", [])
+
+        # handle dates
+        created = data.get("created_at") or data.get("createdAt")
+        updated = data.get("updated_at") or data.get("updatedAt")
+
+        if isinstance(created, str):
+            entry.created_at = datetime.fromisoformat(created.replace("Z", "+00:00"))
+        else:
+            entry.created_at = created
+
+        if isinstance(updated, str):
+            entry.updated_at = datetime.fromisoformat(updated.replace("Z", "+00:00"))
+        else:
+            entry.updated_at = updated
+
         return entry

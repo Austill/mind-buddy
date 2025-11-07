@@ -120,28 +120,23 @@ export default function ChatWidget() {
    */
   const loadProactiveCheckIn = async () => {
     try {
-      const checkIn = await getProactiveCheckIn();
-      
-      // Add Sereni's greeting as first message
-      const greetingMessage: DisplayMessage = {
-        id: 'check-in-' + Date.now(),
-        content: checkIn.message,
+      const response = await getProactiveCheckIn();
+      const proactiveMessage: DisplayMessage = {
+        id: 'proactive-' + Date.now(),
+        content: response.message,
         role: 'assistant',
         timestamp: new Date(),
       };
-      
-      setMessages([greetingMessage]);
+      setMessages([proactiveMessage]);
     } catch (error) {
-      console.error('Failed to load check-in:', error);
-      
-      // Fallback greeting if API fails
+      console.error('Failed to load proactive check-in:', error);
+      // Fallback message if API fails
       const fallbackMessage: DisplayMessage = {
         id: 'fallback-' + Date.now(),
-        content: "Hi! I'm Sereni, your mental wellness companion. How can I support you today?",
+        content: "Hi! I'm Sereni, your mental wellness companion. 🌱\n\nI'm here to listen and support you. How are you feeling today?",
         role: 'assistant',
         timestamp: new Date(),
       };
-      
       setMessages([fallbackMessage]);
     }
   };
@@ -150,13 +145,38 @@ export default function ChatWidget() {
    * Send user's message to AI and get response
    * Handles the complete message flow including error states
    */
+  const generateFallbackResponse = (message: string): string => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Crisis keywords
+    if (lowerMessage.includes('suicide') || lowerMessage.includes('kill myself') || lowerMessage.includes('end it all')) {
+      return "I'm really concerned about what you're going through. Please reach out for immediate help:\n\n🆘 988 - Suicide & Crisis Lifeline (24/7)\n📱 Text HOME to 741741 (Crisis Text Line)\n\nYou matter, and there are people who want to help.";
+    }
+    
+    // Anxiety/stress
+    if (lowerMessage.includes('anxious') || lowerMessage.includes('anxiety') || lowerMessage.includes('stress') || lowerMessage.includes('worried')) {
+      return "It sounds like you're dealing with a lot right now. Here are some quick techniques that might help:\n\n🌬️ Try the 4-7-8 breathing: breathe in for 4, hold for 7, out for 8\n✍️ Write down what's worrying you\n🚶 Take a short walk\n\nWould you like to tell me more about what's on your mind?";
+    }
+    
+    // Depression/sadness
+    if (lowerMessage.includes('depress') || lowerMessage.includes('sad') || lowerMessage.includes('hopeless') || lowerMessage.includes('lonely')) {
+      return "I hear you, and your feelings are valid. Remember that it's okay to not be okay sometimes.\n\nSome gentle suggestions:\n• Reach out to someone you trust\n• Do one small thing you usually enjoy\n• Be kind to yourself today\n\nI'm here to listen. What would help you most right now?";
+    }
+    
+    // Positive emotions
+    if (lowerMessage.includes('happy') || lowerMessage.includes('great') || lowerMessage.includes('good') || lowerMessage.includes('better')) {
+      return "That's wonderful to hear! 😊 It's important to celebrate the good moments. What's contributing to these positive feelings?";
+    }
+    
+    // General support
+    return "Thank you for sharing that with me. I'm here to support you. Would you like to:\n\n• Talk more about how you're feeling\n• Try a quick meditation or breathing exercise\n• Write in your journal\n• Learn about coping strategies\n\nWhat feels right for you?";
+  };
+
   const handleSendMessage = async () => {
-    // Validation: don't send empty messages
     if (!currentMessage.trim()) {
       return;
     }
 
-    // Create user message object
     const userMessage: DisplayMessage = {
       id: 'user-' + Date.now(),
       content: currentMessage.trim(),
@@ -164,78 +184,53 @@ export default function ChatWidget() {
       timestamp: new Date(),
     };
 
-    // Optimistically add user message to UI immediately
     setMessages(prev => [...prev, userMessage]);
-    
-    // Clear input field
     const messageToSend = currentMessage.trim();
     setCurrentMessage('');
-
-    // Show loading state
     setIsLoading(true);
 
     try {
-      // Call AI service to get Sereni's response
-      const response: ChatResponse = await sendChatMessage(
-        messageToSend,
-        conversationId
-      );
+      // Send message to backend AI service
+      const response: ChatResponse = await sendChatMessage(messageToSend, conversationId);
 
-      // Store conversation ID for future messages
-      if (!conversationId) {
+      // Update conversation ID if this is the first message
+      if (!conversationId && response.conversation_id) {
         setConversationId(response.conversation_id);
       }
 
-      // Create AI response message
       const aiMessage: DisplayMessage = {
-        id: response.chat_id,
+        id: 'ai-' + Date.now(),
         content: response.ai_response,
         role: 'assistant',
         timestamp: new Date(),
         sentiment: response.sentiment,
       };
 
-      // Add AI response to chat
       setMessages(prev => [...prev, aiMessage]);
 
-      // If crisis detected, show alert
+      // Show crisis alert if detected
       if (response.requires_professional_help) {
         toast({
-          title: "Crisis Support Available",
-          description: "If you're in crisis, please reach out to: National Suicide Prevention Lifeline: 988",
+          title: "Crisis Support",
+          description: "I've detected you might need immediate help. Please reach out to a professional.",
           variant: "destructive",
-          duration: 10000,
-        });
-      }
-
-      // Notify if AI used fallback (model might be slow)
-      if (response.source === 'fallback') {
-        toast({
-          title: 'Using backup response',
-          description: 'AI model is warming up, responses may be slower.',
-          duration: 3000,
         });
       }
 
     } catch (error) {
       console.error('Failed to send message:', error);
-      
-      // Show error toast to user
-      toast({
-        title: 'Failed to send message',
-        description: 'Please try again. If the issue persists, check your connection.',
-        variant: 'destructive',
-      });
 
-      // Add error message to chat
-      const errorMessage: DisplayMessage = {
-        id: 'error-' + Date.now(),
-        content: "I'm having trouble connecting right now. Please try again in a moment.",
+      // Fallback to local response if API fails
+      const aiResponse = generateFallbackResponse(messageToSend);
+
+      const aiMessage: DisplayMessage = {
+        id: 'ai-' + Date.now(),
+        content: aiResponse,
         role: 'assistant',
         timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, aiMessage]);
     } finally {
       setIsLoading(false);
     }

@@ -39,39 +39,72 @@ class MoodEntry:
         return self.collection.delete_one({"_id": self._id})
 
     def set_triggers(self, triggers):
-        """Set triggers for the mood entry"""
         if isinstance(triggers, list):
             self.triggers = triggers
         else:
             self.triggers = [triggers] if triggers else []
 
     def get_triggers(self):
-        """Get triggers for the mood entry"""
         return self.triggers or []
 
     def to_dict(self):
+        # normalize to camelCase for frontend
         return {
             "_id": str(self._id),
+            "id": str(self._id),
             "user_id": str(self.user_id),
+            "userId": str(self.user_id),
             "mood_level": self.mood_level,
+            "moodLevel": self.mood_level,
             "emoji": self.emoji,
             "note": self.note,
             "triggers": self.triggers,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+            "created_at": self.created_at.isoformat() + "Z" if self.created_at else datetime.utcnow().isoformat() + "Z",
+            "createdAt": self.created_at.isoformat() + "Z" if self.created_at else datetime.utcnow().isoformat() + "Z",
+            "updated_at": self.updated_at.isoformat() + "Z" if self.updated_at else datetime.utcnow().isoformat() + "Z",
+            "updatedAt": self.updated_at.isoformat() + "Z" if self.updated_at else datetime.utcnow().isoformat() + "Z"
         }
 
     @classmethod
     def from_dict(cls, data):
         entry = cls.__new__(cls)
-        entry._id = data.get("_id")
-        entry.user_id = data.get("user_id")
-        entry.mood_level = data.get("mood_level")
+        entry._id = data.get("_id") or data.get("id")
+        if isinstance(entry._id, str):
+            entry._id = ObjectId(entry._id)
+
+        uid = data.get("user_id") or data.get("userId")
+        entry.user_id = ObjectId(uid) if isinstance(uid, str) else uid
+
+        entry.mood_level = data.get("mood_level", data.get("moodLevel"))
         entry.emoji = data.get("emoji")
         entry.note = data.get("note")
         entry.triggers = data.get("triggers", [])
-        entry.created_at = data.get("created_at")
-        entry.updated_at = data.get("updated_at")
+
+        created = data.get("created_at") or data.get("createdAt")
+        updated = data.get("updated_at") or data.get("updatedAt")
+
+        # Handle created_at with fallbacks
+        if isinstance(created, str):
+            try:
+                entry.created_at = datetime.fromisoformat(created.replace("Z", "+00:00"))
+            except (ValueError, TypeError):
+                entry.created_at = datetime.utcnow()
+        elif isinstance(created, datetime):
+            entry.created_at = created
+        else:
+            entry.created_at = datetime.utcnow()
+
+        # Handle updated_at with fallbacks
+        if isinstance(updated, str):
+            try:
+                entry.updated_at = datetime.fromisoformat(updated.replace("Z", "+00:00"))
+            except (ValueError, TypeError):
+                entry.updated_at = datetime.utcnow()
+        elif isinstance(updated, datetime):
+            entry.updated_at = updated
+        else:
+            entry.updated_at = datetime.utcnow()
+
         return entry
 
     def __repr__(self):

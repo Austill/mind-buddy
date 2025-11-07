@@ -166,7 +166,7 @@ export default function PremiumFeatures({ isPremium = false }: PremiumFeaturesPr
 
               <div className="space-y-3 mb-6">
                 {premiumFeatures.slice(0, 4).map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center text-sm">
+                  <div key={`plan-feature-${plan.id}-${feature.title}-${featureIndex}`} className="flex items-center text-sm">
                     <Check className="w-4 h-4 text-[hsl(var(--wellness-primary))] mr-2 flex-shrink-0" />
                     <span>{feature.title}</span>
                   </div>

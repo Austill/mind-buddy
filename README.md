@@ -30,7 +30,7 @@
 
 ### 🤖 AI-Powered Features (NEW!)
 - **Sentiment Analysis**: Automatic emotion detection from journal entries using RoBERTa model
-- **AI Chatbot (Sereni)**: Conversational AI companion for mental wellness support
+- **AI Chatbot (Sereni)**: Conversational AI companion for mental wellness support powered by Hugging Face models
 - **Personalized Insights**: Daily wellness tips based on mood patterns
 - **Crisis Detection**: Automatic detection of concerning keywords with immediate resources
 - **Wellness Recommendations**: Activity suggestions (breathing, meditation, journaling) based on mood
@@ -85,6 +85,18 @@ Make sure you have the following installed on your machine:
     # Default connection: mongodb://localhost:27017/mindbuddy
     # You can modify MONGO_URI in backend/.env if needed
 
+    # Optional: Set Hugging Face model (default: microsoft/DialoGPT-small)
+    # Available models:
+    # - microsoft/DialoGPT-small (fast, ~117MB)
+    # - microsoft/DialoGPT-medium (balanced, ~345MB)
+    # - TinyLlama/TinyLlama-1.1B-Chat-v1.0 (good quality, ~2.2GB)
+    # export HF_MODEL_NAME="microsoft/DialoGPT-medium"
+
+    # Optional: Configure generation parameters
+    # export MAX_NEW_TOKENS="256"  # Response length
+    # export TEMPERATURE="0.7"     # Creativity (0.1-1.0)
+    # export TOP_P="0.9"           # Diversity
+
     # Start the backend server (usually on http://127.0.0.1:5000)
     python run.py
     # Or use Flask directly:
@@ -118,8 +130,44 @@ Make sure you have the following installed on your machine:
 
 This project is structured as a monorepo and is optimized for a split deployment:
 
-- **Frontend**: Deployed on **Vercel**. The root directory in the Vercel project settings is set to `frontend`.
-- **Backend**: Deployed on **Render**. The root directory in the Render service settings is set to `backend`. The build command runs `pip install -r requirements.txt` and the start command runs `gunicorn app:app`.
+### Frontend Deployment (Vercel)
+
+1. **Connect Repository**: Link your GitHub repository to Vercel.
+2. **Project Settings**:
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+   - **Install Command**: `npm install`
+3. **Environment Variables** (if needed):
+   - `VITE_API_BASE_URL`: Your backend API URL (e.g., `https://your-backend.onrender.com`)
+4. **Deploy**: Vercel will automatically deploy on every push to the main branch.
+
+### Backend Deployment (Render)
+
+1. **Create Web Service**: Connect your GitHub repository to Render.
+2. **Service Settings**:
+   - **Root Directory**: `backend`
+   - **Runtime**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT app:app`
+3. **Environment Variables**:
+   - `MONGO_URI`: Your MongoDB Atlas connection string
+   - `SECRET_KEY`: A secure random string for Flask sessions
+   - `HF_MODEL_NAME`: Hugging Face model name (optional, defaults to `microsoft/DialoGPT-small`)
+   - `MAX_NEW_TOKENS`: Response length (optional, default 256)
+   - `TEMPERATURE`: Creativity level (optional, default 0.7)
+   - `TOP_P`: Diversity (optional, default 0.9)
+   - `FLASK_ENV`: `production`
+4. **Database**: Ensure MongoDB Atlas is set up and accessible.
+5. **Deploy**: Render will build and deploy your backend.
+
+### Deployment Checklist
+
+- [ ] Backend deployed on Render with environment variables set
+- [ ] Frontend deployed on Vercel with API base URL configured
+- [ ] MongoDB Atlas database connected
+- [ ] Test API endpoints after deployment
+- [ ] Verify frontend can communicate with backend
 
 ## 📄 License
 

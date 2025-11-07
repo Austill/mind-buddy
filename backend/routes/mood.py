@@ -80,8 +80,8 @@ def get_mood_entries(current_user):
                 continue
             entries.append(entry)
 
-        # Sort by most recent first
-        entries.sort(key=lambda x: x.created_at, reverse=True)
+        # Sort by most recent first, handle None dates
+        entries.sort(key=lambda x: x.created_at or datetime.min, reverse=True)
 
         # Apply pagination
         total = len(entries)

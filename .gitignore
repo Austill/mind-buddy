@@ -53,4 +53,18 @@ show_structure.py
 .coverage.*
 coverage.xml
 htmlcov/
-.env
+
+# Monorepo specific
+# Backend specific
+backend/.env
+backend/instance/
+backend/app.db
+backend/migrations/
+
+# Frontend specific
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development
+
+# Root level test files (moved to respective folders)
+# test_*.py files should be in backend/ or frontend/
