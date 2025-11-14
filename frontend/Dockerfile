@@ -4,14 +4,14 @@ FROM node:20-alpine as builder
 
 WORKDIR /build
 
-# Copy package files
-COPY package.json bun.lockb ./
+# Copy package files (from frontend directory)
+COPY frontend/package.json frontend/bun.lockb ./
 
 # Install dependencies (using npm as fallback, bun.lockb is a lock file indicator)
 RUN npm ci --prefer-offline --no-audit
 
-# Copy source code
-COPY . .
+# Copy source code (from frontend directory)
+COPY frontend/ .
 
 # Build the Vite app
 RUN npm run build
@@ -24,7 +24,7 @@ WORKDIR /app
 # Install serve to run static files in production
 RUN npm install -g serve
 
-# Copy built app from builder
+# Copy built app from builder (dist is at /build/dist after build)
 COPY --from=builder /build/dist ./dist
 
 # Create non-root user for security
