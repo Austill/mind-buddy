@@ -4,6 +4,7 @@
 
 services:
   # Backend Web Service - Flask + Gunicorn in Docker
+  # Note: startCommand is not allowed with docker runtime; CMD in Dockerfile handles startup
   - type: web
     name: mind-buddy-backend
     runtime: docker
@@ -11,16 +12,15 @@ services:
     plan: free
     autoDeploy: true
     dockerfilePath: ./backend/Dockerfile
-    startCommand: gunicorn --bind 0.0.0.0:$PORT wsgi:app
     envVars:
       - key: FLASK_ENV
         value: production
       - key: SECRET_KEY
-        fromGroup: mind-buddy-prod
+        value: misaro
       - key: JWT_SECRET_KEY
-        fromGroup: mind-buddy-prod
+        value: misaro
       - key: MONGO_URI
-        fromGroup: mind-buddy-prod
+        value: mongodb+srv://austin:misaro@cluster1.ynxgjwq.mongodb.net/?appName=Cluster1
       - key: MONGODB_DB_NAME
         value: mind_buddy
       - key: HF_MODEL_NAME
@@ -54,10 +54,7 @@ envVarGroups:
     envVars:
       - key: SECRET_KEY
         value: misaro
-        sync: false
       - key: JWT_SECRET_KEY
         value: misaro
-        sync: false
       - key: MONGO_URI
         value: mongodb+srv://austin:misaro@cluster1.ynxgjwq.mongodb.net/?appName=Cluster1
-        sync: false
