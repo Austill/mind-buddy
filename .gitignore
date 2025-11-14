@@ -1,4 +1,4 @@
-# IDE and OS files
+# ==================== IDE and OS Files ====================
 .idea/
 .vscode/
 *.suo
@@ -8,63 +8,155 @@
 *.sw?
 *~
 .DS_Store
+Thumbs.db
+.env.local.user
 
-# Dependencies
-# Ignore node_modules directories in any folder
+# ==================== Dependencies ====================
+# Node modules
 node_modules/
+yarn.lock
+package-lock.json
+bun.lockb
 
-# Python virtual environment
-# Ignore virtual environment directories, wherever they are
+# Python virtual environments
 .venv/
 venv/
+env/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Build artifacts
-# Ignore build output directories in any folder
+# ==================== Build Artifacts ====================
 build/
 dist/
 .next/
 .out/
 .svelte-kit/
 .vercel/
+*.tsbuildinfo
 
-# Environment variables
-# Ignore all .env files, but not .env.example files
-.env*
-!/.env.example
-!/.env.*.example
+# ==================== Environment Variables (CRITICAL!) ====================
+# NEVER commit .env files with real credentials
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
 
-# Logs
+# Allow template/example files
+!.env.example
+!.env.*.example
+!.env.docker
+
+# ==================== Logs ====================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+*.log
 
-# Python artifacts
+# ==================== Python Artifacts ====================
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 *.so
+*.egg
+*.egg-info/
+dist/
 *.egg-info/
 .pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
 show_structure.py
+
 # Coverage reports
 .coverage
 .coverage.*
 coverage.xml
 htmlcov/
+.hypothesis/
 
-# Monorepo specific
-# Backend specific
+# ==================== Docker & Container Files ====================
+# Don't commit local build artifacts
+.docker/
+.dockerignore.local
+
+# ==================== Backend Specific ====================
 backend/.env
+backend/.env.local
 backend/instance/
 backend/app.db
-backend/migrations/
+backend/*.db
+backend/.cache/
+backend/.pytest_cache/
+backend/__pycache__/
+backend/wsgi.ini
+backend/gunicorn.conf.py
 
-# Frontend specific
+# ==================== Frontend Specific ====================
 frontend/.env.local
 frontend/.env.production
 frontend/.env.development
+frontend/.cache/
+frontend/.next/
+frontend/out/
 
-# Root level test files (moved to respective folders)
-# test_*.py files should be in backend/ or frontend/
+# ==================== Database Files ====================
+*.sqlite
+*.sqlite3
+*.db
+*.sql
+
+# ==================== OS Temporary Files ====================
+.tmp/
+.temp/
+tmp/
+temp/
+
+# ==================== Render/Deployment Artifacts ====================
+# Local Render builds
+.render/
+render-build.log
+
+# ==================== Node-specific ====================
+.npm
+.node-gyp
+.npm-cache
+
+# ==================== IDE-specific ====================
+.editorconfig.local
+*.sublime-project
+*.sublime-workspace
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# ==================== macOS ====================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ==================== Windows ====================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ==================== Linux ====================
+.directory
+.Trash-*
+
+# ==================== OneDrive/Cloud Sync ====================
+# Ignore OneDrive temporary files
+~$*.xlsx
+~$*.pptx
+~$*.docx
+.~*
+
+# ==================== Git ====================
+.git/
+.gitkeep
