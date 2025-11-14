@@ -1,0 +1,71 @@
+# Render.com Blueprint Configuration
+# This file enables one-click deployment of Mind Buddy to Render
+# Documentation: https://render.com/docs/blueprint-spec
+
+services:
+  # Backend Web Service - Flask + Gunicorn in Docker
+  - type: web
+    name: mind-buddy-backend
+    runtime: docker
+    region: ohio
+    plan: free
+    autoDeploy: true
+    dockerfilePath: ./backend/Dockerfile
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT wsgi:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        fromGroup: mind-buddy-prod
+      - key: JWT_SECRET_KEY
+        fromGroup: mind-buddy-prod
+      - key: MONGO_URI
+        fromGroup: mind-buddy-prod
+      - key: MONGODB_DB_NAME
+        value: mind_buddy
+      - key: CORS_ORIGINS
+        value: https://${RENDER_EXTERNAL_HOSTNAME_FRONTEND}
+      - key: HF_MODEL_NAME
+        value: facebook/blenderbot-400M-distill
+      - key: MAX_NEW_TOKENS
+        value: "100"
+      - key: TEMPERATURE
+        value: "0.7"
+      - key: TOP_P
+        value: "0.9"
+      - key: LOGGING_LEVEL
+        value: INFO
+
+  # Frontend Static Site - React + Vite
+  - type: static_site
+    name: mind-buddy-frontend
+    runtime: node
+    region: ohio
+    plan: free
+    autoDeploy: true
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    routes:
+      - path: /
+        destination: /index.html
+      - path: /api
+        destination: https://${RENDER_EXTERNAL_HOSTNAME_BACKEND}
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://${RENDER_EXTERNAL_HOSTNAME_BACKEND}
+      - key: VITE_API_URL
+        value: https://${RENDER_EXTERNAL_HOSTNAME_BACKEND}
+
+envVarGroups:
+  - name: mind-buddy-prod
+    envVars:
+      - key: SECRET_KEY
+        value: misaro
+        sync: false
+      - key: JWT_SECRET_KEY
+        value: misaro
+        sync: false
+      - key: MONGO_URI
+        value: mongodb+srv://austin:misaro@cluster1.ynxgjwq.mongodb.net/?appName=Cluster1
+        sync: false

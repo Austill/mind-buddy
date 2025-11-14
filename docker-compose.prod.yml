@@ -1,0 +1,105 @@
+# Production Docker Compose Configuration
+# For LOCAL testing of production-like setup
+# Uses MongoDB Atlas instead of local MongoDB container
+# Command: docker-compose -f docker-compose.prod.yml up -d
+# 
+# NOTE: This is for local testing only.
+# For Render deployment, use render.yaml instead.
+
+version: '3.8'
+
+services:
+  # Flask Backend Service (Production)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mindbuddy-backend-prod
+    environment:
+      # Flask Configuration
+      FLASK_ENV: production
+      SECRET_KEY: ${SECRET_KEY:-misaro}
+      
+      # MongoDB Atlas Configuration (no local MongoDB needed)
+      MONGO_URI: ${MONGO_URI:-mongodb+srv://austin:misaro@cluster1.ynxgjwq.mongodb.net/?appName=Cluster1}
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME:-mind_buddy}
+      
+      # JWT Configuration
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-misaro}
+      
+      # CORS Configuration
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      
+      # AI/LLM Configuration
+      HF_MODEL_NAME: ${HF_MODEL_NAME:-facebook/blenderbot-400M-distill}
+      MAX_NEW_TOKENS: ${MAX_NEW_TOKENS:-100}
+      TEMPERATURE: ${TEMPERATURE:-0.7}
+      TOP_P: ${TOP_P:-0.9}
+      
+      # Payment Configuration (Flutterwave)
+      FLW_SECRET_KEY: ${FLW_SECRET_KEY:-}
+      FLW_SIGNATURE_KEY: ${FLW_SIGNATURE_KEY:-}
+      FLW_PLAN_ID: ${FLW_PLAN_ID:-}
+      REDIRECT_URL: ${REDIRECT_URL:-}
+      
+      # Logging
+      LOGGING_LEVEL: ${LOGGING_LEVEL:-INFO}
+    
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    
+    networks:
+      - mindbuddy-network
+    
+    volumes:
+      # HuggingFace model cache - persists between restarts on Render
+      - backend_cache:/app/.cache
+    
+    restart: always
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # React Frontend Service (Production)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mindbuddy-frontend-prod
+    environment:
+      # API Configuration - Point to backend
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5000}
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:5000}
+    
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    
+    depends_on:
+      - backend
+    
+    networks:
+      - mindbuddy-network
+    
+    restart: always
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  # HuggingFace model cache (for LLM models)
+  backend_cache:
+    driver: local
+
+networks:
+  mindbuddy-network:
+    driver: bridge
