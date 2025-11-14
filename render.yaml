@@ -11,7 +11,6 @@ services:
     plan: free
     autoDeploy: true
     dockerfilePath: ./backend/Dockerfile
-    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT wsgi:app
     envVars:
       - key: FLASK_ENV
@@ -24,8 +23,6 @@ services:
         fromGroup: mind-buddy-prod
       - key: MONGODB_DB_NAME
         value: mind_buddy
-      - key: CORS_ORIGINS
-        value: https://${RENDER_EXTERNAL_HOSTNAME_FRONTEND}
       - key: HF_MODEL_NAME
         value: facebook/blenderbot-400M-distill
       - key: MAX_NEW_TOKENS
@@ -37,25 +34,22 @@ services:
       - key: LOGGING_LEVEL
         value: INFO
 
-  # Frontend Static Site - React + Vite
-  - type: static_site
+  # Frontend Web Service - React + Vite (served as web service)
+  - type: web
     name: mind-buddy-frontend
-    runtime: node
+    runtime: docker
     region: ohio
     plan: free
     autoDeploy: true
-    buildCommand: cd frontend && npm ci && npm run build
-    staticPublishPath: ./frontend/dist
+    dockerfilePath: ./frontend/Dockerfile
     routes:
       - path: /
-        destination: /index.html
-      - path: /api
-        destination: https://${RENDER_EXTERNAL_HOSTNAME_BACKEND}
+        destination: /
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://${RENDER_EXTERNAL_HOSTNAME_BACKEND}
+        value: https://mind-buddy-backend.onrender.com
       - key: VITE_API_URL
-        value: https://${RENDER_EXTERNAL_HOSTNAME_BACKEND}
+        value: https://mind-buddy-backend.onrender.com
 
 envVarGroups:
   - name: mind-buddy-prod
