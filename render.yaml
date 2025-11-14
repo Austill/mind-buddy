@@ -42,9 +42,7 @@ services:
     plan: free
     autoDeploy: true
     dockerfilePath: ./frontend/Dockerfile
-    routes:
-      - path: /
-        destination: /
+    # For a Docker web service, routing is handled by Render at the service-level; no `routes` block required here.
     envVars:
       - key: VITE_API_BASE_URL
         value: https://mind-buddy-backend.onrender.com
