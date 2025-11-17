@@ -1,178 +1,333 @@
-# Mind Buddy 🧠✨
+# SereniTree 🌳
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Vercel](https://therealsujitk-vercel-badge.vercel.app/?app=mind-buddy-ten)](https://mind-buddy-ten.vercel.app/)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-2.2.2-000000?logo=flask)](https://flask.palletsprojects.com/)
-[![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)](https://reactjs.org/)
+A comprehensive mental health and wellness application designed to support users in tracking their emotional well-being, maintaining journals, practicing mindfulness, and accessing crisis support. Powered by AI-driven insights and featuring a conversational assistant named Sereni.
 
-> Your AI-powered companion for mental wellness and productivity.
+## ✨ Features
 
-**Mind Buddy** is a full-stack web application designed to help users track their mood, journal their thoughts, and gain insights through an interactive AI chat interface.
+### Core Functionality
+- **Mood Tracking**: Daily mood logging with emoji-based ratings and trigger identification
+- **Journaling**: Private and public journal entries with AI-powered sentiment analysis
+- **AI Chat Assistant**: Conversational support with Sereni, an AI companion backed by Groq LLM
+- **Meditation Guide**: Guided meditation sessions for mindfulness and relaxation
+- **Progress Analytics**: Visual dashboards showing mood trends, streaks, and wellness insights
+- **Crisis Support**: Emergency resources and coping strategies
 
----
+### Premium Features
+- **Advanced Analytics**: Detailed progress reports and trend analysis
+- **Priority AI Support**: Enhanced AI conversations and personalized insights
+- **Export Data**: Download your wellness data for personal records
+- **Premium Themes**: Additional customization options
 
-### ▶️ Live Demo
-
-[**[your-live-mind-buddy-app](https://mind-buddy-ten.vercel.app/)**]
-
----
-
-![Mind Buddy Screenshot](mind-buddy.png)
-
-## 🌟 Features
-
-### Core Features
-- **Journaling**: A secure and private space to write down your thoughts.
-- **Mood Tracking**: Log your daily mood to visualize trends over time.
-- **User Authentication**: Secure sign-up and login functionality.
-- **Responsive Design**: A seamless experience on both desktop and mobile devices.
-
-### 🤖 AI-Powered Features (NEW!)
-- **Sentiment Analysis**: Automatic emotion detection from journal entries using RoBERTa model
-- **AI Chatbot (Sereni)**: Conversational AI companion for mental wellness support powered by Hugging Face models
-- **Personalized Insights**: Daily wellness tips based on mood patterns
-- **Crisis Detection**: Automatic detection of concerning keywords with immediate resources
-- **Wellness Recommendations**: Activity suggestions (breathing, meditation, journaling) based on mood
-- **Trend Analysis**: Visualize emotional patterns over time
-
-📋 **For detailed AI features documentation, see [AI_FEATURES.md](AI_FEATURES.md)**
+### Technical Features
+- **Real-time AI Insights**: Daily wellness recommendations based on your data
+- **Secure Authentication**: JWT-based user authentication with encrypted passwords
+- **Cross-platform**: Responsive design for desktop and mobile devices
+- **Offline-capable**: Core functionality works without internet connection
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-| :--- | :--- |
-| **Frontend** | JavaScript, React (or your framework), CSS |
-| **Backend** | Python, Flask, Flask-SQLAlchemy, Flask-Migrate, Flask-CORS |
-| **Database** | MongoDB (local/development), MongoDB Atlas (production) |
-| **Deployment** | **Frontend:** Vercel / **Backend:** Render |
+### Backend
+- **Framework**: Flask (Python)
+- **Database**: MongoDB (Atlas)
+- **Authentication**: JWT (JSON Web Tokens)
+- **AI Integration**: Groq API (Llama models)
+- **Payments**: Flutterwave integration
+- **Deployment**: Render
 
-## 🚀 Getting Started
+### Frontend
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS + Shadcn/ui components
+- **State Management**: React Query (TanStack)
+- **Routing**: React Router
+- **Icons**: Lucide React
+- **Deployment**: Vercel
 
-Follow these instructions to set up the project locally for development and testing.
+### Development Tools
+- **Package Management**: npm (frontend), pip (backend)
+- **Version Control**: Git
+- **Code Quality**: ESLint, TypeScript
+- **Testing**: Basic server tests included
 
-### Prerequisites
+## 📋 Prerequisites
 
-Make sure you have the following installed on your machine:
-- [Git](https://git-scm.com/)
-- [Python 3.10+](https://www.python.org/downloads/)
-- [Node.js & npm](https://nodejs.org/en/)
-- [MongoDB](https://www.mongodb.com/try/download/community) (required for local development)
+Before running this application, ensure you have the following installed:
 
-📋 **For detailed MongoDB setup instructions, see [MONGODB_SETUP.md](MONGODB_SETUP.md)**
+### System Requirements
+- **Python**: 3.10 or higher
+- **Node.js**: 18.x or higher
+- **npm**: Latest version
+- **Git**: Latest version
 
-### Installation & Setup
+### External Services
+- **MongoDB Atlas**: Database hosting
+- **Groq API**: AI chat functionality (optional for basic features)
+- **Flutterwave**: Payment processing (optional for premium features)
 
-1.  **Clone the repository:**
-    ```sh
-    git clone https://github.com/Sereni-Crew/mind-buddy.git
-    cd mind-buddy
-    ```
+## 🚀 Installation & Setup
 
-2.  **Set up the Backend (Flask):**
-    ```sh
-    # Navigate to the backend directory
-    cd backend
+### 1. Clone the Repository
 
-    # Create and activate a virtual environment (optional but recommended)
-    python -m venv venv
-    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+```bash
+git clone <repository-url>
+cd serenitree
+```
 
-    # Install dependencies
-    pip install -r requirements.txt
+### 2. Backend Setup
 
-    # The .env file is already configured for local MongoDB
-    # Default connection: mongodb://localhost:27017/mindbuddy
-    # You can modify MONGO_URI in backend/.env if needed
+#### Navigate to Backend Directory
+```bash
+cd backend
+```
 
-    # Optional: Set Hugging Face model (default: microsoft/DialoGPT-small)
-    # Available models:
-    # - microsoft/DialoGPT-small (fast, ~117MB)
-    # - microsoft/DialoGPT-medium (balanced, ~345MB)
-    # - TinyLlama/TinyLlama-1.1B-Chat-v1.0 (good quality, ~2.2GB)
-    # export HF_MODEL_NAME="microsoft/DialoGPT-medium"
+#### Create Virtual Environment
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
 
-    # Optional: Configure generation parameters
-    # export MAX_NEW_TOKENS="256"  # Response length
-    # export TEMPERATURE="0.7"     # Creativity (0.1-1.0)
-    # export TOP_P="0.9"           # Diversity
+# macOS/Linux
+python -m venv venv
+source venv/bin/activate
+```
 
-    # Start the backend server (usually on http://127.0.0.1:5000)
-    python run.py
-    # Or use Flask directly:
-    flask run
-    ```
+#### Install Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-    **Note**: MongoDB does not require migrations like SQL databases. Collections are created automatically when first used.
+#### Environment Configuration
+```bash
+# Copy environment template
+cp backend/.env.example backend/.env
 
-3.  **Set up the Frontend (React):**
-    ```sh
-    # Open a new terminal and navigate to the frontend directory
-    cd frontend
+# Edit the .env file with your configuration
+notepad backend/.env  # Windows
+# or
+nano backend/.env     # Linux/macOS
+```
 
-    # Install dependencies
-    npm install
+**Required Environment Variables:**
+```env
+# Flask Configuration
+SECRET_KEY=your-secret-key-here
+LOGGING_LEVEL=DEBUG
 
-    # Configure the backend API URL if needed
-    # Check frontend/.env.local or create one with:
-    # VITE_API_BASE_URL=http://127.0.0.1:5000
+# Database
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/mindbuddy
+MONGODB_DB_NAME=mindbuddy
 
-    # Start the frontend development server (usually on http://localhost:5173)
-    npm run dev
-    ```
+# AI Integration (Groq)
+GROQ_API_KEY=your-groq-api-key
+GROQ_MODEL=llama-3.1-8b-instant
 
-4.  **Access the Application:**
-    - Frontend: http://localhost:5173
-    - Backend API: http://localhost:5000
-    - API Health Check: http://localhost:5000/api/health
+# CORS (Frontend URLs)
+CORS_ORIGINS=http://localhost:3000,https://your-frontend-domain.vercel.app
 
-## 🚢 Deployment
+# JWT
+JWT_SECRET_KEY=your-jwt-secret
 
-This project is structured as a monorepo and is optimized for a split deployment:
+# Payments (Optional)
+FLW_SECRET_KEY=your-flutterwave-secret
+FLW_SIGNATURE_KEY=your-flutterwave-signature
+FLW_PLAN_ID=your-plan-id
+```
 
-### Frontend Deployment (Vercel)
+#### Run Backend Server
+```bash
+# From backend directory
+python run.py
+```
 
-1. **Connect Repository**: Link your GitHub repository to Vercel.
-2. **Project Settings**:
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-   - **Install Command**: `npm install`
-3. **Environment Variables** (if needed):
-   - `VITE_API_BASE_URL`: Your backend API URL (e.g., `https://your-backend.onrender.com`)
-4. **Deploy**: Vercel will automatically deploy on every push to the main branch.
+The backend will start on `http://localhost:5000`
 
-### Backend Deployment (Render)
+### 3. Frontend Setup
 
-1. **Create Web Service**: Connect your GitHub repository to Render.
-2. **Service Settings**:
-   - **Root Directory**: `backend`
-   - **Runtime**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT app:app`
-3. **Environment Variables**:
-   - `MONGO_URI`: Your MongoDB Atlas connection string
-   - `SECRET_KEY`: A secure random string for Flask sessions
-   - `HF_MODEL_NAME`: Hugging Face model name (optional, defaults to `microsoft/DialoGPT-small`)
-   - `MAX_NEW_TOKENS`: Response length (optional, default 256)
-   - `TEMPERATURE`: Creativity level (optional, default 0.7)
-   - `TOP_P`: Diversity (optional, default 0.9)
-   - `FLASK_ENV`: `production`
-4. **Database**: Ensure MongoDB Atlas is set up and accessible.
-5. **Deploy**: Render will build and deploy your backend.
+#### Navigate to Frontend Directory
+```bash
+cd ../frontend  # From backend
+```
 
-### Deployment Checklist
+#### Install Dependencies
+```bash
+npm install
+```
 
-- [ ] Backend deployed on Render with environment variables set
-- [ ] Frontend deployed on Vercel with API base URL configured
-- [ ] MongoDB Atlas database connected
-- [ ] Test API endpoints after deployment
-- [ ] Verify frontend can communicate with backend
+#### Environment Configuration (if needed)
+The frontend uses environment variables for API endpoints. Create `.env.local` if deploying to different environments:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+#### Run Development Server
+```bash
+npm run dev
+```
+
+The frontend will start on `http://localhost:3000`
+
+## 📖 Usage
+
+### Getting Started
+1. **Register**: Create a new account with email and password
+2. **Login**: Access your personalized dashboard
+3. **First Mood Check-in**: Start tracking your daily mood
+4. **Explore Features**: Try journaling, meditation, or chat with Sereni
+
+### Key Workflows
+
+#### Mood Tracking
+- Navigate to "Mood Tracker" in the main menu
+- Select your current mood level (1-5 scale)
+- Add optional notes and triggers
+- View your mood history in the Progress dashboard
+
+#### Journaling
+- Go to "Journal" section
+- Create new entries with titles and content
+- Mark entries as private if desired
+- AI will analyze sentiment and provide insights
+
+#### AI Chat (Sereni)
+- Click the floating chat widget
+- Ask questions or share thoughts
+- Receive supportive responses and wellness tips
+- Access proactive check-ins for daily wellness
+
+#### Progress Analytics
+- Visit "Progress" to see mood trends
+- View streaks and achievements
+- Get daily AI-generated insights
+- Track journal activity and mood patterns
+
+### Premium Features
+- Upgrade through the "Premium" section
+- Complete payment via integrated Flutterwave
+- Access advanced analytics and export options
+
+## 🔌 API Documentation
+
+The backend provides a REST API under `/api/*` endpoints.
+
+### Key Endpoints
+
+#### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `PUT /api/auth/change-password` - Password change
+
+#### Core Features
+- `GET /api/health` - Service health check
+- `GET/POST /api/mood` - Mood entries
+- `GET/POST /api/journal` - Journal entries
+- `POST /api/chat/message` - AI chat messages
+- `GET /api/progress` - Progress analytics
+
+#### Premium
+- `POST /api/payments/initiate` - Payment initialization
+- `GET /api/user/premium-status` - Premium status check
+
+### API Response Format
+All responses follow a consistent JSON structure:
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "Optional message"
+}
+```
+
+## 🚀 Deployment
+
+### Backend (Render)
+1. Connect your GitHub repository to Render
+2. Set environment variables in Render dashboard
+3. Deploy from the `backend` directory
+4. Note the deployed URL for CORS configuration
+
+### Frontend (Vercel)
+1. Connect your GitHub repository to Vercel
+2. Set `VITE_API_BASE_URL` to your Render backend URL
+3. Deploy from the `frontend` directory
+4. Update backend CORS_ORIGINS with the Vercel domain
+
+### Production Checklist
+- [ ] Set strong SECRET_KEY and JWT_SECRET_KEY
+- [ ] Configure production MongoDB Atlas cluster
+- [ ] Set up proper CORS_ORIGINS
+- [ ] Enable HTTPS (automatic on Vercel/Render)
+- [ ] Configure logging level to INFO/WARNING
+- [ ] Test all features in production environment
+
+## 🧪 Testing
+
+### Backend Tests
+```bash
+# From backend directory
+python -c "import backend; print('Backend import successful')"
+python test_server.py
+```
+
+### Frontend Tests
+```bash
+# From frontend directory
+npm run lint
+npm run build  # Test production build
+```
+
+## 🤝 Contributing
+
+We welcome contributions to SereniTree! Please follow these guidelines:
+
+### Development Setup
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+### Code Standards
+- **Backend**: Follow PEP 8 Python style guide
+- **Frontend**: Use TypeScript, follow ESLint rules
+- **Commits**: Use descriptive commit messages
+- **Documentation**: Update README for new features
+
+### Areas for Contribution
+- UI/UX improvements
+- New meditation content
+- Additional crisis resources
+- Performance optimizations
+- Accessibility enhancements
+- Internationalization (i18n)
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+### Getting Help
+- **Documentation**: Check this README and backend README
+- **Issues**: Report bugs via GitHub Issues
+- **Discussions**: Use GitHub Discussions for questions
+
+### Crisis Resources
+SereniTree provides access to crisis support resources. In case of emergency:
+- **Immediate Help**: Contact local emergency services
+- **Hotlines**: National suicide prevention lifeline
+- **Professional Help**: Consult licensed mental health professionals
+
+## 🙏 Acknowledgments
+
+- **AI Partner**: Groq for providing fast LLM inference
+- **UI Components**: Shadcn/ui for beautiful React components
+- **Icons**: Lucide React for consistent iconography
+- **Styling**: Tailwind CSS for responsive design
+- **Payments**: Flutterwave for secure payment processing
 
 ---
 
-Made with ❤️ by Sereni Crew💡
+**SereniTree** - Nurturing mental wellness, one interaction at a time. 🌱
+
+For detailed backend documentation, see the backend section of this README.
