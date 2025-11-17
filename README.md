@@ -329,5 +329,3 @@ SereniTree provides access to crisis support resources. In case of emergency:
 ---
 
 **SereniTree** - Nurturing mental wellness, one interaction at a time. 🌱
-
-For detailed backend documentation, see the backend section of this README.
