@@ -94,6 +94,8 @@ backend/.pytest_cache/
 backend/__pycache__/
 backend/wsgi.ini
 backend/gunicorn.conf.py
+/app.db
+/backend/instance
 
 # ==================== Frontend Specific ====================
 frontend/.env.local
